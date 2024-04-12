@@ -120,6 +120,14 @@ function getPlayerChoice() {
     // Ask player to input rock, paper, or scissors
     userChoice = prompt("Rock, Paper, or Scissors?")
 
+    // If the user pressed Cancel, then the returned value will be `null`.
+    // If they did that then give them some feedback and then crash to return control
+    // back to them.
+    if (userChoice === null) {
+      alert("You cancelled the user input. Terminating the game.");
+      throw new Error("User terminated the game!")
+    }
+
     // If they didn't input one of those, then warn them, loop and ask them again
     if (!isRockPaperOrScissors(userChoice)) {
       alert("You didn't enter one of Rock, Paper, or Scissors!")
