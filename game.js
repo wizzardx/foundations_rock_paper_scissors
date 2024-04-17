@@ -142,49 +142,67 @@ function getPlayerChoice() {
   return userChoice;
 }
 
-function playGame() {
-  // Keep track of wins by each of the players:
-  let numComputerWins = 0;
-  let numPlayerWins = 0;
-  // Play 5 rounds of the game
-  for (let i = 1; i <= 5; i++) {
-    // Within each loop iteration:
-    //  - Get the player's input
-    const playerChoice = getPlayerChoice();
-    //  - Get the computers input
-    const computerChoice = getComputerChoice();
-    //  - Play a single round, using the player and the computers inputs
-    const winResult = playRound(playerChoice, computerChoice)
-
-    // - Print out the message for the win result:
-    console.log(winResult.message);
-
-    //  - Update the correct counter for who has won how many times
-    switch (winResult.whoWon) {
-      case WhoWon.PLAYER:
-        numPlayerWins++;
-        break;
-      case WhoWon.NOBODY:
-        break; // Intentionally doing nothing
-      case WhoWon.COMPUTER:
-        numComputerWins++;
-        break;
-      default:
-        console.error(`Unknown winner ${winResult.whoWon}`)
-    }
+function logToResultDiv(obj) {
+  // Add a div for displaying results and change all of your console.logs into DOM methods.
+  const results_div = document.querySelector("#results_div")
+  if (results_div === null) {
+    console.error("Could not find the results div.");
+    return;
   }
-  // At the end of the 5 rounds, we check who won
-  // If the computer won then it congratulates itself
-  if (numComputerWins > numPlayerWins) {
-    console.log("I win!");
-    // Otherwise if the player won then we congratulate the player
-  } else if (numPlayerWins > numComputerWins) {
-    console.log("You win!");
-    // Otherwise confirm that it's a draw, and then inform the player.
-  } else {
-    if (numComputerWins !== numPlayerWins) {
-      throw new Error(`Expected numComputerWins (${numComputerWins}) to equal numPlayerWins (${numPlayerWins}), but something weird happened!`)
-    }
-  }
-
+  const para = document.createElement("p")
+  para.textContent = obj.toString();
+  results_div.appendChild(para);
+  console.log(results_div.textContent);
 }
+
+// Add listeners for the 3 input buttons (Rock, Paper, Scissors)
+// Add an event listener to the buttons that call your playRound function with the correct playerSelection every time a
+//button is clicked. (you can keep the console.logs for this step)
+{
+  const selections = ['rock', 'paper', 'scissors'];
+  for (const selection of selections) {
+    const button_id = "#" + selection + '_button'; // eg: '#rock_button'
+    const button = document.querySelector(button_id)
+    if (button === null) {
+      console.error(`Could not find element matching selector ${button_id}`);
+      break;
+    }
+    button.addEventListener('click', () => {
+      const playerSelection = selection;
+      const computerSelection = getComputerChoice();
+      let winResult = playRound(playerSelection, computerSelection);
+      logToResultDiv(winResult.message);
+
+      // Update the score global variables
+      switch (winResult.whoWon) {
+        case WhoWon.PLAYER:
+          playerWins++;
+          break;
+        case WhoWon.COMPUTER:
+          computerWins++;
+          break;
+        case WhoWon.NOBODY:
+          draws++;
+          break;
+        default:
+          console.error(`Unknown winner ${winResult.whoWon}`)
+      }
+
+      // Display the running score in the log.
+      logToResultDiv(`Player: ${playerWins}, Computer: ${computerWins}, Draws: ${draws}`)
+
+      // Announce a winner if the computer or the player reached 5 wins
+      if (playerWins === 5) {
+        logToResultDiv("You won the game! Congratulations!");
+      } else if (computerWins === 5) {
+        logToResultDiv("The computer won the game! Better luck next time!");
+      }
+    })
+  }
+}
+
+// Global variables to store the running score (number of wins for the player and the computer, as well as
+// number of draws)
+let playerWins = 0;
+let computerWins = 0;
+let draws = 0;
